@@ -27,8 +27,8 @@ Structured syntax
 
 * Language Spec:
 - Event Loop:
-  By default every action is sync
-  Explicitly define Async commands
+   - By default every action is sync
+   - Explicitly define Async commands
 
 - Syntax:
   1) Space seperated
