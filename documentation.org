@@ -26,11 +26,30 @@ Structured syntax
 
 
 * Language Spec:
-Open <url>
-Fill <#element> <value/variable>
-Read <#element> ## push to stack/memory
-Store <variable_name> ## pop stack and store value in variable_name
-Extract <#element> <variable_name> ## directly extact value from element and store in variable_name
-Click <#element> ## click button element
-IF <this> Do <action> Else <other_action>
-Jump <line_number>
+- Event Loop:
+  By default every action is sync
+  Explicitly define Async commands
+
+- Syntax:
+  1) Space seperated
+  2) \n for line terminations
+  3) Keywords start with capital letter
+  4) variables name must start with lowercase
+
+- Features:
+  - Open <url>
+  - Fill <#element> <value/variable>
+  - Read <#element> ## push to stack/memory
+  - Store <variable_name> ## pop stack and store value in variable_name
+  - Extract <#element> <variable_name> ## directly extact value from element and store in variable_name
+  - Click <#element> ## click button element
+  - IF <this> Do <action> Else <other_action>
+    - Jump <line_number:type:Int>:
+            If <this> Do Jmp<line_number>
+            if a==1 Do Jmp 1
+            advance:
+             if <this> Do Store a
+
+* VM Spec:
+- Python + asyncio (need to learn asyncio)
+- Typescript (already familiar)
