@@ -1,0 +1,36 @@
+#+TITLE: Custom Language for Browser Automation
+
+#+DESCRIPTION: A simple toy language to automate browser actions.
+
+* Overview
+language should be designed to automate browser interactions.
+
+* Supported Actions
+1) Open web pages
+2) Identify elements
+3) Read/extract values
+4) Click buttons
+5) filling fields
+
+* Language specific features:
+Branching
+Looping
+Error Handling
+Variables storage/referencing
+Structured syntax
+- Runs on an Execution Layer or Interpreter:
+   Minimal Error handling and logging
+   Support for Async interactions
+   use any browser automation library or headless browser
+
+
+
+* Language Spec:
+Open <url>
+Fill <#element> <value/variable>
+Read <#element> ## push to stack/memory
+Store <variable_name> ## pop stack and store value in variable_name
+Extract <#element> <variable_name> ## directly extact value from element and store in variable_name
+Click <#element> ## click button element
+IF <this> Do <action> Else <other_action>
+Jump <line_number>
