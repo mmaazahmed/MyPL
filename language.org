@@ -1,0 +1,53 @@
+TRY:
+    Open https://example.com # add promise to stack
+    Wait #wait for promise to fulfil
+    IF #pageLoaded EXISTS:
+        Read #price ## Push to stack
+        Store price ## Pop stack and store value in price
+        IF price > 50:
+            Do Click #buyNow
+        ELSE:
+            Do Click #continueBrowsing
+        END
+END
+CATCH:
+    Log "Error: Could not read price or click button"
+END
+
+
+For i in 5..4..10:
+    ## do something
+End
+
+
+* Features:
+Error handling:
+        TRY
+            ..
+        CATCH
+        ..
+        END
+Looping:
+        IF:
+
+        ELSE:
+
+        END
+Variables:
+        Read <element>
+        Store <variable>
+
+TRY:
+Open https://example.com # add promise to stack
+Wait #wait for promise to fulfil
+IF #pageLoaded EXISTS:
+Read #price ## Push to stack
+Store price ## Pop stack and store value in price
+IF price > 50:
+Do Click #buyNow
+ELSE:
+Do Click #continueBrowsing
+END
+CATCH:
+Log "Error: Could not read price or click button"
+END
