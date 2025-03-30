@@ -1,0 +1,16 @@
+# # # Open a ebpage
+# OPEN "https://example.com"
+
+ON "#login-form" {
+    FILL "#username" WITH "test_user" # directly fill '#username' with "test_user"
+    FILL "#password" WITH password_variable # fill "#password" with value in password_variable
+    CLICK "#submit"
+}
+
+# SET variable1 WITH READ "#element"
+# SET variable2 WITH "text"
+# # SET variable2 WITH 1
+# SET variabl WITH variable # set variable3 with value in variable 2
+
+# invalid:
+# CLICK variable
