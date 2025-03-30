@@ -3,8 +3,9 @@ from Lexer.lexer import Lexer
 
 
 class Parser:
-    def __init__(self, tokens):
-        self.tokens = tokens
+    def __init__(self, filePath:str):
+        self.lexer = Lexer()
+        self.tokens = self.lexer.parse(filePath)
         self.index = 0
         self.ast = None
 
@@ -32,7 +33,7 @@ class Parser:
         self.expect("OPEN")
         url_token = self.expect('STRING_LITERAL')
         return {
-            "type": "Navigate",
+            "type": "NavigateExpression",
             "url": {"type": 'Literal', "value": url_token[1]}
         }
 
@@ -55,7 +56,7 @@ class Parser:
             value = self.parse_arguments()
 
         return {
-            'type': "Assignment",
+            'type': "AssignmentExpression",
             'target': {"type": 'Identifier', "name": variable},
             'value': value,
         }
@@ -110,7 +111,31 @@ class Parser:
             "type": 'ClickExpression',
             "target": {"type": 'Locator', "value": locator},
         }
+    def parse_literal(self):
+        literal = self.expect('STRING_LITERAL')[1]
+        return {
+            "type":"Literal",
+            "value":literal
+        }
 
+    def parse_identifier(self):
+        name = self.expect('IDENTIFIER')[1]
+        return {
+            "type":"Identifier",
+            "name":name
+        }
+    def parse_log(self):
+        self.expect('LOG')
+        value =None
+        if self.match('STRING_LITERAL'):
+            value = self.parse_literal()
+        else :
+            value = self.parse_identifier()
+
+        return {
+            "type": 'LogExpression',
+            "value": value,
+        }
     def parse_statement(self):
         token = self.peek()
         if token[1] == "OPEN":
@@ -125,6 +150,8 @@ class Parser:
             return self.parse_read()
         elif token[1] == 'CLICK':
             return self.parse_click()
+        elif token[1] == 'LOG':
+            return self.parse_log()
         else:
             raise SyntaxError(f'unknown Action {token[1]}')
 
@@ -137,11 +164,10 @@ class Parser:
         return self.ast
 
 
-lexer = Lexer()
-lexer.parse("./code.mypl")
-tokens = lexer.get_tokens()
+# lexer = Lexer()
+# tokens = lexer.parse("./code.mypl")
 # print(tokens)
-Parser = Parser(tokens)
-ast = Parser.parse()
-Parser.print_ast()
-print(ast)
+# Parser = Parser(tokens)
+# ast = Parser.parse()
+# Parser.print_ast()
+# print(ast)

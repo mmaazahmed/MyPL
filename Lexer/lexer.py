@@ -17,7 +17,7 @@ class Lexer:
         ("HAS", r'HAS'),
         ("IS", r'IS'),
         ("EXISTS", r'EXISTS'),
-        ("LOG", r'LOG'),
+        ("LOG", r'\bLOG\b'),
         ("CLICK", r'CLICK'),
         ("WHILE", r'WHILE'),
         ("L_BRACE", r'{'),

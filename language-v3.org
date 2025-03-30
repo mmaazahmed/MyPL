@@ -19,6 +19,7 @@ IF welcome_text CONTAINS "Hello, test_user" {
     CLICK "#retry"
 }
 
+
 IF READ "#welcome_text" CONTAINS "Hello, test_user" {
     CLICK "#continue"
 } ELSE {
