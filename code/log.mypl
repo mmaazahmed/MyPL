@@ -1,0 +1,3 @@
+LOG "Test"
+SET t_var WITH "S"
+LOG READ "asd"

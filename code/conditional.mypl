@@ -1,0 +1,7 @@
+
+IF (x IS "12"){
+FILL "SD" WITH "sd"
+}ELSE{
+LOG "here"
+
+}
