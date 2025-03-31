@@ -1,4 +1,4 @@
-
+import sys
 import re
 from typing import List
 
@@ -47,3 +47,13 @@ class Lexer:
             if group != "WHITESPACE":
                 tokens.append((group, value))
         return tokens
+
+if __name__ == "__main__":
+    file_path =  sys.argv[1:][0]
+    lexer = Lexer()
+    tokens = lexer.parse(file_path)
+    print('\n')
+    print(file_path)
+    print("----------------------")
+    print(f"tokens:{tokens}")
+    print("----------------------")
