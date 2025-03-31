@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+import sys
 from Lexer.lexer import Lexer
 
 
 class Parser:
-    def __init__(self, filePath:str):
+    def __init__(self):
         self.lexer = Lexer()
-        self.tokens = self.lexer.parse(filePath)
+        self.tokens = None
         self.index = 0
         self.ast = None
 
@@ -14,6 +15,10 @@ class Parser:
 
     def expect(self, expected_type):
         token = self.consume()
+        if not token:
+            raise SyntaxError(
+                f'Invalid syntax missing {expected_type}')
+
         if token and token[0] != expected_type:
             raise SyntaxError(
                 f'Invalid syntax expected {expected_type} got {token[0]}')
@@ -31,16 +36,19 @@ class Parser:
 
     def parse_navigation(self):
         self.expect("OPEN")
-        url_token = self.expect('STRING_LITERAL')
+        url= self.parse_literal()
         return {
             "type": "NavigateExpression",
-            "url": {"type": 'Literal', "value": url_token[1]}
+            "url": url
         }
 
     def parse_block(self):
         actions = []
-        while not self.match('R_BRACE'):
+        self.expect('L_BRACE')
+        while not self.match('R_BRACE') and self.peek() is not None:
             actions.append(self.parse_statement())
+        print("block")
+        self.expect('R_BRACE')
         return actions
 
     def parse_assignment(self):
@@ -49,7 +57,6 @@ class Parser:
         self.expect('WITH')
         value = None
         if self.match('READ'):
-            # handle dom read
             value = self.parse_read()
         else:
             # handle varibale or literal
@@ -63,13 +70,11 @@ class Parser:
 
     def parse_element_interaction(self):
         self.expect('ON')
-        locator = self.expect("STRING_LITERAL")[1].strip("\'")
-        self.expect('L_BRACE')
+        locator = self.parse_locator()
         actions = self.parse_block()
-        self.expect('R_BRACE')
         return {
             "type": "ElementInteraction",
-            "target": {"type": 'Locator', "value": locator},
+            "target": locator,
             "wait": True,
             "actions": actions
         }
@@ -98,21 +103,21 @@ class Parser:
 
     def parse_read(self):
         self.expect('READ')
-        locator = self.expect('STRING_LITERAL')[1].strip("\'")
+        locator = self.parse_locator()
         return {
             "type": 'ReadExpression',
-            "target": {"type": 'Locator', "value": locator},
+            "target": locator
         }
 
     def parse_click(self):
         self.expect('CLICK')
-        locator = self.expect('STRING_LITERAL')[1].strip("\'")
+        locator = self.parse_locator()
         return {
             "type": 'ClickExpression',
-            "target": {"type": 'Locator', "value": locator},
+            "target": locator
         }
     def parse_literal(self):
-        literal = self.expect('STRING_LITERAL')[1]
+        literal = self.expect('STRING_LITERAL')[1].strip("\"")
         return {
             "type":"Literal",
             "value":literal
@@ -124,9 +129,15 @@ class Parser:
             "type":"Identifier",
             "name":name
         }
+    def parse_locator(self):
+        value = self.expect('STRING_LITERAL')[1].strip("\"")
+        return {
+            "type":"Locator",
+            "value":value
+        }
     def parse_log(self):
         self.expect('LOG')
-        value =None
+        value = None
         if self.match('STRING_LITERAL'):
             value = self.parse_literal()
         else :
@@ -136,27 +147,60 @@ class Parser:
             "type": 'LogExpression',
             "value": value,
         }
+
+    def parse_logical_expression(self):
+        left = self.parse_arguments()
+        operator = self.expect("LOGICAL_OPERATOR")[1]
+        right = self.parse_arguments()
+        return {
+            "type": 'BinaryExpression',
+            "operator": operator,
+            "left": left,
+            "right": right,
+        }
+
+    def parse_conditional(self):
+        self.expect("IF")
+        self.expect("L_PAREN")
+        conditional = self.parse_logical_expression()
+        self.expect("R_PAREN")
+        then_block = self.parse_block()
+        else_block = None
+        if self.match("ELSE"):
+            self.consume()
+            else_block = self.parse_block()
+
+        return {
+            "type": "ConditionalExpression",
+            "conditional": conditional,
+            "then": then_block,
+            "else": else_block
+        }
+
     def parse_statement(self):
         token = self.peek()
-        if token[1] == "OPEN":
+        if token[0] == "OPEN":
             return self.parse_navigation()
-        elif token[1] == "ON":
+        elif token[0] == "ON":
             return self.parse_element_interaction()
-        elif token[1] == "FILL":
+        elif token[0] == "FILL":
             return self.parse_fill()
-        elif token[1] == 'SET':
+        elif token[0] == 'SET':
             return self.parse_assignment()
-        elif token[1] == 'READ':
+        elif token[0] == 'READ':
             return self.parse_read()
-        elif token[1] == 'CLICK':
+        elif token[0] == 'CLICK':
             return self.parse_click()
-        elif token[1] == 'LOG':
+        elif token[0] == 'LOG':
             return self.parse_log()
+        elif token[0] == 'IF':
+            return self.parse_conditional()
         else:
             raise SyntaxError(f'unknown Action {token[1]}')
 
-    def parse(self):
+    def parse(self,filePath:str):
         body = []
+        self.tokens = self.lexer.parse(filePath)
         while self.peek():
             node = self.parse_statement()
             body.append(node)
@@ -164,10 +208,12 @@ class Parser:
         return self.ast
 
 
-# lexer = Lexer()
-# tokens = lexer.parse("./code.mypl")
-# print(tokens)
-# Parser = Parser(tokens)
-# ast = Parser.parse()
-# Parser.print_ast()
-# print(ast)
+if __name__ == "__main__":
+    file_path =  sys.argv[1:][0]
+    Parser = Parser()
+    ast = Parser.parse(file_path)
+    print('\n')
+    print(file_path)
+    print("----------------------")
+    print(f"ast:{ast}")
+    print("----------------------")
