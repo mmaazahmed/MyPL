@@ -38,6 +38,8 @@ class Interpreter:
             return self.variables[variable]
         elif type == 'Literal':
             return node["value"]
+        elif type == 'Locator':
+            return node["value"]
 
         return await self.execute(node)
 
@@ -56,10 +58,10 @@ class Interpreter:
 
     async def handle_read_expression(self,node):
         locator = node["target"]["value"]
-        return await self.page.locator(locator).text_content()
+        return await self.page.locator(locator).first.text_content()
 
     async def handle_element_interaction(self,node):
-        locator = node["target"]["value"]
+        locator = await self.get_node_value(node["target"])
         actions = node["actions"]
         await self.page.locator(locator).wait_for(state='visible')
         for action in actions:
@@ -86,6 +88,14 @@ class Interpreter:
         else:
             for action in node["else"]:
                 await self.execute(action)
+    async def handle_fill_expression(self,node):
+        target = await self.get_node_value(node["target"])
+        value = await self.get_node_value(node["value"])
+        await self.page.locator(target).fill(value)
+
+    async def handle_click_expression(self,node):
+        target = await self.get_node_value(node["target"])
+        await self.page.locator(target).click()
 
     async def execute(self, node):
 
@@ -151,48 +161,3 @@ if __name__ == "__main__":
         asyncio.run(main(file_path,flag))
     except Exception as e:
         print(f"Error occurred while starting up interpreter  {file_path}: {e}")
-
-# {
-#   "type": "Program",
-#   "body": [
-#     {
-#       "type": "ElementInteraction",
-#       "target": {
-#         "type": "Locator",
-#         "value": "#login-form"
-#       },
-#       "wait": true,
-#       "actions": [
-#         {
-#           "type": "FillExpression",
-#           "target": {
-#             "type": "Literal",
-#             "value": "#username"
-#           },
-#           "value": {
-#             "type": "Literal",
-#             "value": "test_user"
-#           }
-#         },
-#         {
-#           "type": "FillExpression",
-#           "target": {
-#             "type": "Literal",
-#             "value": "#password"
-#           },
-#           "value": {
-#             "type": "Identifier",
-#             "name": "password_variable"
-#           }
-#         },
-#         {
-#           "type": "ClickExpression",
-#           "target": {
-#             "type": "Locator",
-#             "value": "#submit"
-#           }
-#         }
-#       ]
-#     }
-#   ]
-# }

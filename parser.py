@@ -21,7 +21,7 @@ class Parser:
 
         if token and token[0] != expected_type:
             raise SyntaxError(
-                f'Invalid syntax expected {expected_type} got {token[0]}')
+                f'Invalid syntax expected {expected_type} got {token[0]}:"{token[1]}"')
         return token
 
     def match(self, expected_type, offset=0):
@@ -69,7 +69,7 @@ class Parser:
 
     def parse_element_interaction(self):
         self.expect('ON')
-        locator = self.parse_locator()
+        locator = self.parse_arguments()
         actions = self.parse_block()
         return {
             "type": "ElementInteraction",
@@ -107,10 +107,19 @@ class Parser:
             "type": 'ReadExpression',
             "target": locator
         }
-
+    def parse_try_catch(self):
+        self.expect('TRY')
+        try_block = self.parse_block()
+        self.expect('CATCH')
+        catch_block = self.parse_block()
+        return {
+            "type":"TryCatchExpression",
+            "try":try_block,
+            "catch":catch_block
+        }
     def parse_click(self):
         self.expect('CLICK')
-        locator = self.parse_locator()
+        locator = self.parse_arguments()
         return {
             "type": 'ClickExpression',
             "target": locator
@@ -139,8 +148,10 @@ class Parser:
         value = None
         if self.match('STRING_LITERAL'):
             value = self.parse_literal()
-        else :
+        elif self.match('IDENTIFIER') :
             value = self.parse_identifier()
+        else:
+            value = self.parse_statement()
 
         return {
             "type": 'LogExpression',
@@ -194,8 +205,10 @@ class Parser:
             return self.parse_log()
         elif token[0] == 'IF':
             return self.parse_conditional()
+        elif token[0] == 'TRY':
+            return self.parse_try_catch()
         else:
-            raise SyntaxError(f'unknown Action {token[1]}')
+            raise SyntaxError(f'unknown Action {token}')
 
     def parse(self,filePath:str):
         body = []

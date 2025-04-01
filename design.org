@@ -1,0 +1,37 @@
+Title# Waiting for element to load and perform prodecures
+
+ON element FOR 20 {
+
+}
+
+Assignment:
+
+SET variable WITH "literal"
+SET variable WITH variable2
+SET variable WITH READ "element"
+
+Conditional:
+IF(condition){
+
+# execute block
+}ELSE{
+execute
+}
+
+Print value to screen:
+LOG variable
+LOG "literal"
+LOG READ "element"
+
+
+NAVIGATION:
+OPEN url
+
+Interactions:
+CLICK "#element"
+
+
+PENDING:
+try
+
+catch
