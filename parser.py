@@ -47,7 +47,6 @@ class Parser:
         self.expect('L_BRACE')
         while not self.match('R_BRACE') and self.peek() is not None:
             actions.append(self.parse_statement())
-        print("block")
         self.expect('R_BRACE')
         return actions
 
@@ -83,7 +82,7 @@ class Parser:
         result = {}
         if self.match('STRING_LITERAL'):
             result["type"] = 'Literal'
-            result["value"] = self.consume()[1]
+            result["value"] = self.consume()[1].strip("\"")
         elif self.match('IDENTIFIER'):
             result["type"] = 'Identifier'
             result["name"] = self.consume()[1]
