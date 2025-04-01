@@ -1,8 +1,7 @@
 from parser import Parser
 import sys
 import asyncio
-from playwright.async_api import async_playwright
-
+from playwright.async_api import async_playwright, Error,TimeoutError
 
 class Interpreter:
     def __init__(self):
@@ -67,13 +66,13 @@ class Interpreter:
         for action in actions:
             await self.execute(action)
 
-    async def handle_try_catch_expression(self,node):
+    async def handle_try_catch_expression(self, node):
         try_block = node["try"]
-        catch_block  = node["catch"]
+        catch_block = node["catch"]
         try:
             for try_action in try_block:
                 await self.execute(try_action)
-        except RuntimeError:
+        except (RuntimeError, Error, TimeoutError):
             for catch_action in catch_block:
                 await self.execute(catch_action)
         except Exception as e:
@@ -88,8 +87,12 @@ class Interpreter:
         if operator in ["==", "IS"]:
             result = left_value == right_value
 
-        if operator == "HAS":
+        if operator == "HAS" and isinstance(left_value, (str, list)):
             result = right_value in left_value
+        if operator =='<':
+            return left_value < right_value
+        if operator =='<=':
+            return left_value <= right_value
 
         if result is None:
             raise RuntimeError(f"invalid conditional")
@@ -119,10 +122,20 @@ class Interpreter:
                 await self.execute(statement)
 
     async def handle_wait_expression(self,node):
-        duration = node["duration"]
+        duration = await self.get_node_value(node["duration"])
         await asyncio.sleep(duration)
-    async def execute(self, node):
 
+    async def handle_binary_expression(self,node):
+        operator = node["operator"]
+        left = await self.get_node_value(node["left"])
+        right = await self.get_node_value(node["right"])
+        if operator =='+':
+            return left + right
+        if operator =='-':
+            return left - right
+        raise RuntimeError(f"unsupported operator {operator}")
+
+    async def execute(self, node):
         type = node["type"]
         if type == 'ElementInteraction':
             return await self.handle_element_interaction(node)
@@ -146,6 +159,8 @@ class Interpreter:
             return await self.handle_while_expression(node)
         elif type == "WaitExpression":
             return await self.handle_wait_expression(node)
+        elif type == "BinaryExpression":
+            return await self.handle_binary_expression(node)
         else:
             raise RuntimeError(
                 f'unsupported {type}')
@@ -161,6 +176,7 @@ class Interpreter:
                 await self.execute(node)
             print(f"Done executing script {file_path}")
         except Exception as e:
+            print(type(e))
             print(f"Error during execution: file:{file_path} {e}")
             print("------------------------------------")
             print("AST\n",self.ast)

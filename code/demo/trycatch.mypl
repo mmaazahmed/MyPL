@@ -1,0 +1,6 @@
+TRY {
+    CLICK "#non-existent-element"
+    LOG "This won't execute"
+} CATCH {
+    LOG "Element not found, continuing execution"
+}

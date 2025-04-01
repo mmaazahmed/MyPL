@@ -59,7 +59,7 @@ class Parser:
             value = self.parse_read()
         else:
             # handle varibale or literal
-            value = self.parse_arguments()
+            value = self.parse_expression()
 
         return {
             'type': "AssignmentExpression",
@@ -69,7 +69,7 @@ class Parser:
 
     def parse_element_interaction(self):
         self.expect('ON')
-        locator = self.parse_arguments()
+        locator = self.parse_expression()
         actions = self.parse_block()
         return {
             "type": "ElementInteraction",
@@ -78,7 +78,7 @@ class Parser:
             "actions": actions
         }
 
-    def parse_arguments(self):
+    def parse_primary(self):
         result = {}
         if self.match('STRING_LITERAL'):
             result["type"] = 'Literal'
@@ -86,14 +86,19 @@ class Parser:
         elif self.match('IDENTIFIER'):
             result["type"] = 'Identifier'
             result["name"] = self.consume()[1]
+        elif self.match("INTEGER_LITERAL"):
+            result["type"] = 'Literal'
+            result["value"] = int(self.consume()[1])
+        else:
+            raise SyntaxError(f"expected indentifiers,integer literals or string literals but got {self.peek()}")
 
         return result
 
     def parse_fill(self):
         self.expect('FILL')
-        left = self.parse_arguments()
+        left = self.parse_expression()
         self.expect('WITH')
-        right = self.parse_arguments()
+        right = self.parse_expression()
         return {
             "type": "FillExpression",
             "target": left,
@@ -119,7 +124,7 @@ class Parser:
         }
     def parse_click(self):
         self.expect('CLICK')
-        locator = self.parse_arguments()
+        locator = self.parse_expression()
         return {
             "type": 'ClickExpression',
             "target": locator
@@ -159,9 +164,9 @@ class Parser:
         }
 
     def parse_logical_expression(self):
-        left = self.parse_arguments()
+        left = self.parse_expression()
         operator = self.expect("LOGICAL_OPERATOR")[1]
-        right = self.parse_arguments()
+        right = self.parse_expression()
         return {
             "type": 'BinaryExpression',
             "operator": operator,
@@ -198,11 +203,25 @@ class Parser:
         }
     def parse_wait(self):
         self.expect('WAIT')
-        duration = self.expect('INTEGER_LITERAL')[1]
+        duration = self.parse_expression()
         return {
             "type":"WaitExpression",
-            "duration":int(duration)
+            "duration":duration
         }
+
+    def parse_expression(self):
+        left = self.parse_primary()
+        if not self.match("ARITHMETIC_OPERATOR"):
+            return left
+        operator = self.consume()[1]
+        right = self.parse_expression()
+        return {
+            "type": "BinaryExpression",
+            "operator": operator,
+            "left": left,
+            "right": right,
+        }
+
     def parse_statement(self):
         token = self.peek()
         if token[0] == "OPEN":
@@ -227,10 +246,12 @@ class Parser:
             return self.parse_while_loop()
         elif token[0] == 'WAIT':
             return self.parse_wait()
+        elif token[0] in ["INTEGER_LITERAL", "STRING_LITERAL", "IDENTIFIER"]:
+            return self.parse_expression()
         else:
             raise SyntaxError(f'unknown Action {token}')
 
-    def parse(self,filePath:str):
+    def parse(self, filePath: str):
         body = []
         self.tokens = self.lexer.parse(filePath)
         while self.peek():

@@ -11,6 +11,7 @@ class Lexer:
         ("CATCH", r'\bCATCH\b'),
         ("INTEGER_LITERAL", r'\b\d+\b'),
         ("LOGICAL_OPERATOR", r'==|AND|OR|>|<|<=|>=|\bHAS\b|\bIS\b'),
+        ("ARITHMETIC_OPERATOR", r'\+|\-|\*|\/'),
         ("ON", r'ON'),
         ("WAIT",r'\bWAIT\b'),
         ("OPEN", r'OPEN'),
