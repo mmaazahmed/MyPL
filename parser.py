@@ -196,7 +196,13 @@ class Parser:
             "conditional":condition,
             "block":block
         }
-
+    def parse_wait(self):
+        self.expect('WAIT')
+        duration = self.expect('INTEGER_LITERAL')[1]
+        return {
+            "type":"WaitExpression",
+            "duration":int(duration)
+        }
     def parse_statement(self):
         token = self.peek()
         if token[0] == "OPEN":
@@ -219,6 +225,8 @@ class Parser:
             return self.parse_try_catch()
         elif token[0] == 'WHILE':
             return self.parse_while_loop()
+        elif token[0] == 'WAIT':
+            return self.parse_wait()
         else:
             raise SyntaxError(f'unknown Action {token}')
 

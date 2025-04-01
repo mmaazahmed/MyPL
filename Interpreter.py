@@ -118,6 +118,9 @@ class Interpreter:
             for statement in node["block"]:
                 await self.execute(statement)
 
+    async def handle_wait_expression(self,node):
+        duration = node["duration"]
+        await asyncio.sleep(duration)
     async def execute(self, node):
 
         type = node["type"]
@@ -141,6 +144,8 @@ class Interpreter:
             return await self.handle_try_catch_expression(node)
         elif type == "WhileLoopExpression":
             return await self.handle_while_expression(node)
+        elif type == "WaitExpression":
+            return await self.handle_wait_expression(node)
         else:
             raise RuntimeError(
                 f'unsupported {type}')
