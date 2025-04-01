@@ -5,14 +5,13 @@ from playwright.async_api import async_playwright
 
 
 class Interpreter:
-    def __init__(self, filePath: str):
+    def __init__(self):
         self.parser = Parser()
-        self.ast = self.parser.parse(filePath)
         self.variables = {}
         self.playwright = None
         self.browser = None
         self.page = None
-        print(self.ast)
+        self.ast =None
 
     async def initialize(self, isHeadless=True):
         self.playwright = await async_playwright().start()
@@ -115,26 +114,44 @@ class Interpreter:
         await self.browser.close()
         await self.playwright.stop()
 
-    async def run(self):
+    async def run(self,file_path:str):
         try:
+            self.ast = self.parser.parse(file_path)
             for node in self.ast["body"]:
                 await self.execute(node)
+            print(f"Done executing script {file_path}")
         except Exception as e:
-            print(f"Error during execution: {e}")
+            print(f"Error during execution: file:{file_path} {e}")
+            print("------------------------------------")
+            print("AST\n",self.ast)
+            print("------------------------------------")
+            print("Tokens\n",self.parser.tokens)
         finally:
             await self.close_browser()
 
 
-async def main(file_path:str):
-    i = Interpreter(file_path)
+async def main(file_path:str,flag):
+    i = Interpreter()
     await i.initialize(False)
-    await i.run()
+    await i.run(file_path)
+    if (flag in ["--debug","-d"]):
+        print("------------------------------------")
+        print("AST\n",i.ast)
+        print("------------------------------------")
+        print("Tokens\n",i.parser.tokens)
 
 if __name__ == "__main__":
-    file_path =  sys.argv[1:][0]
-    print(f"Running script {file_path}")
-    asyncio.run(main(file_path))
-    print(f"Done executing script {file_path}")
+    file_path =  sys.argv[1]
+    flag =None
+    if len(sys.argv)>=3:
+        flag =  sys.argv[2]
+
+    print(f"starting interpreter {file_path}")
+    try:
+        asyncio.run(main(file_path,flag))
+    except Exception as e:
+        print(f"Error occurred while starting up interpreter  {file_path}: {e}")
+
 # {
 #   "type": "Program",
 #   "body": [
