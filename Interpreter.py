@@ -66,15 +66,28 @@ class Interpreter:
         for action in actions:
             await self.execute(action)
 
-    async def handle_binary_expression(self,node):
-        operator = node["operator"]
-        left = node["left"]
-        right = node["right"]
-
     async def handle_conditional_expression(self,node):
         conditional = node["conditional"]
-        then = node ["then"]
-        _else = node ["else"]
+        operator = conditional["operator"]
+        left_value = await self.get_node_value(conditional["left"])
+        right_value = await self.get_node_value(conditional["right"])
+        result=None
+        if operator  in ["==", "IS"]:
+            result= left_value == right_value
+
+        if operator == "HAS":
+            result= right_value in left_value
+
+        if result is None:
+            raise RuntimeError(f"invalid conditional")
+
+        if result:
+            for action in node["then"]:
+                await self.execute(action)
+        else:
+            for action in node["else"]:
+                await self.execute(action)
+
     async def execute(self, node):
 
         type = node["type"]
