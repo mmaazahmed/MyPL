@@ -1,7 +1,9 @@
-
-IF (x IS "12"){
-FILL "SD" WITH "sd"
+SET f WITH "sdsdsd"
+IF ("22" HAS "2"){
+    LOG "TRUE"
+    LOG f
+# FILL "SD" WITH "sd"
 }ELSE{
-LOG "here"
+    LOG "FALSE"
 
 }

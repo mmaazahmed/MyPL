@@ -67,28 +67,44 @@ class Interpreter:
         for action in actions:
             await self.execute(action)
 
-    async def handle_conditional_expression(self,node):
-        conditional = node["conditional"]
-        operator = conditional["operator"]
-        left_value = await self.get_node_value(conditional["left"])
-        right_value = await self.get_node_value(conditional["right"])
-        result=None
-        if operator  in ["==", "IS"]:
-            result= left_value == right_value
+    async def handle_try_catch_expression(self,node):
+        try_block = node["try"]
+        catch_block  = node["catch"]
+        try:
+            for try_action in try_block:
+                await self.execute(try_action)
+        except RuntimeError:
+            for catch_action in catch_block:
+                await self.execute(catch_action)
+        except Exception as e:
+            print(f"unexpected interpreter error: {e}")
+            raise
+
+    async def handle_condition(self, node):
+        operator = node["operator"]
+        left_value = await self.get_node_value(node["left"])
+        right_value = await self.get_node_value(node["right"])
+        result = None
+        if operator in ["==", "IS"]:
+            result = left_value == right_value
 
         if operator == "HAS":
-            result= right_value in left_value
+            result = right_value in left_value
 
         if result is None:
             raise RuntimeError(f"invalid conditional")
+        return result
 
+    async def handle_conditional_expression(self, node):
+        result = await self.handle_condition(node["conditional"])
         if result:
             for action in node["then"]:
                 await self.execute(action)
         else:
             for action in node["else"]:
                 await self.execute(action)
-    async def handle_fill_expression(self,node):
+
+    async def handle_fill_expression(self, node):
         target = await self.get_node_value(node["target"])
         value = await self.get_node_value(node["value"])
         await self.page.locator(target).fill(value)
@@ -96,6 +112,11 @@ class Interpreter:
     async def handle_click_expression(self,node):
         target = await self.get_node_value(node["target"])
         await self.page.locator(target).click()
+
+    async def handle_while_expression(self,node):
+        while await self.handle_condition(node["conditional"]):
+            for statement in node["block"]:
+                await self.execute(statement)
 
     async def execute(self, node):
 
@@ -116,6 +137,10 @@ class Interpreter:
             return await self.handle_read_expression(node)
         elif type == "ConditionalExpression":
             return await self.handle_conditional_expression(node)
+        elif type == "TryCatchExpression":
+            return await self.handle_try_catch_expression(node)
+        elif type == "WhileLoopExpression":
+            return await self.handle_while_expression(node)
         else:
             raise RuntimeError(
                 f'unsupported {type}')

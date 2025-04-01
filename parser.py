@@ -187,6 +187,16 @@ class Parser:
             "else": else_block
         }
 
+    def parse_while_loop(self):
+        self.expect('WHILE')
+        condition = self.parse_logical_expression()
+        block = self.parse_block()
+        return {
+            "type":"WhileLoopExpression",
+            "conditional":condition,
+            "block":block
+        }
+
     def parse_statement(self):
         token = self.peek()
         if token[0] == "OPEN":
@@ -207,6 +217,8 @@ class Parser:
             return self.parse_conditional()
         elif token[0] == 'TRY':
             return self.parse_try_catch()
+        elif token[0] == 'WHILE':
+            return self.parse_while_loop()
         else:
             raise SyntaxError(f'unknown Action {token}')
 

@@ -19,7 +19,7 @@ class Lexer:
         ("ELSE", r'ELSE'),
         ("LOG", r'\bLOG\b'),
         ("CLICK", r'CLICK'),
-        ("WHILE", r'WHILE'),
+        ("WHILE", r'\bWHILE\b'),
         ("L_PAREN",r'\('),
         ("R_PAREN",r'\)'),
         ("L_BRACE", r'{'),
