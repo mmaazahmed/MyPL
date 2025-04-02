@@ -35,14 +35,3 @@ TRY{
 }
 SET variable WITH "rest"
 SET variable WITH 1
-TRY{
-
-    ON "#unpredictable-element"{
-        #execute
-
-
-    }
-}CATCH{
-
-LOG "something wrong"
-}

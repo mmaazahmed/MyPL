@@ -3,7 +3,6 @@ SET hi WITH 5
 SET hi WITH 5+1
 IF (x HAS "F"){
         LOG "waiting"
-        WAIT hi
         LOG "done waiting"
         SET b WITH "c"
         IF (b HAS "c"){

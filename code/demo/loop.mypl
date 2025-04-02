@@ -1,7 +1,3 @@
-# WAIT 2
-
-# SET load_time WITH 3
-# WAIT load_time
 
 SET attempts WITH 0
 WHILE attempts < 5 {

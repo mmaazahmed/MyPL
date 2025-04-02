@@ -4,4 +4,5 @@ SET search_btn WITH "xpath=/html/body/div[1]/div[3]/form/div[1]/div[1]/div[3]/ce
 ON search_bar {
      FILL search_bar WITH "sd"
      CLICK search_btn
+        WAIT 2
 }

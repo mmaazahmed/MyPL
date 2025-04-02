@@ -1,3 +1,0 @@
-SET a WITH "c" WHILE a HAS "c" {LOG "12"
-SET a WITH "u"
-}

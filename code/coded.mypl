@@ -25,4 +25,4 @@ OPEN "https://www.facebook.com"
 # SET sd WITH sd2
 # LOG "hello"
 # LOG sd
-IF ()
+# IF ()
