@@ -1,0 +1,48 @@
+
+TRY{
+
+    OPEN "https://help.kfc.co.uk/hc/en-gb/requests/new "
+    WAIT  1
+    CLICK "#onetrust-reject-all-handler"
+
+    WAIT  1
+    SET general_enquiries_btn WITH "#fieldContent > div > ul > li:nth-child(4) > a > div > p"
+    CLICK general_enquiries_btn
+
+    WAIT  1
+    SET restuarant_opening_btn WITH "#fieldContent > div > ul > li:nth-child(1) > a > div > p"
+    CLICK restuarant_opening_btn
+
+    WAIT  1
+    SET submit_comment_btn WITH "#fieldContent > div.tilesContainer > ul > li > a > div > p"
+    CLICK submit_comment_btn
+
+    WAIT  1
+    SET inbox_input WITH "this is more than 25 chars, let me hit conitnue please"
+    FILL "#txtAreaQuery" WITH inbox_input
+    CLICK "#contBtn"
+
+    WAIT  1
+    FILL "#fieldContent > div:nth-child(1) > label > input" WITH "maaz"
+    FILL "#fieldContent > div:nth-child(2) > label > input" WITH "ahmed"
+    FILL "#fieldContent > div:nth-child(3) > label > input" WITH "kfc@maildrop.cc"
+    FILL "#fieldContent > div:nth-child(4) > label > input" WITH "03332859456"
+
+    CLICK "#contBtn"
+    CLICK "#btnSubmit"
+}CATCH{
+ LOG "something went wrong"
+}
+SET variable WITH "rest"
+SET variable WITH 1
+TRY{
+
+    ON "#unpredictable-element"{
+        #execute
+
+
+    }
+}CATCH{
+
+LOG "something wrong"
+}

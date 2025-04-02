@@ -1,0 +1,338 @@
+#TITLE: MyPL (My Playwright Language) Design Document
+#+AUTHOR: Muhammad Maaz Ahmed
+
+*  Language Overview
+** Design Principles
+- English-like syntax for web automation
+- Minimalist, space-separated commands
+- Case-sensitive with specific conventions:
+  - Keywords: ALL CAPS (e.g., =OPEN=, =SET=)
+  - Variables: lowercase (e.g., =counter=, =username=)
+  - Comments: Start with # (e.g., =# This is a comment=)
+
+** Supported Features
+*** Data Types
+- Integers (e.g., =3=, =42=)
+- Strings (double-quoted, e.g., ="hello"=)
+- Implicit Booleans (evaluated during runtime)
+
+*** Core Functionality
+- Browser navigation
+- Element interaction (clicks, fills)
+- Text extraction
+- Automatic waiting
+- Manual waiting
+- Variables and assignments
+- Conditionals and loops
+- Error handling
+
+** Reserved Keywords
+| Keyword | Purpose                  |
+|---------|--------------------------|
+| OPEN    | Navigate to URL          |
+| WAIT    | Pause execution          |
+| CLICK   | Click element            |
+| FILL    | Fill form field          |
+| READ    | Extract text from element|
+| LOG     | Print output             |
+| SET     | Variable assignment      |
+| IF      | Conditional block        |
+| ELSE    | Alternative block        |
+| WHILE   | Loop construct           |
+| TRY     | Error handling block     |
+| CATCH   | Error recovery block     |
+| HAS     | String contains operator |
+| IS      | Equality operator        |
+| <       | Less-than operator       |
+| >       | Greater-than operator    |
+| <=      | Less-than-equals operator |
+
+** Language Components
+| Component        | Examples                      | Purpose                      |
+|------------------|-------------------------------|------------------------------|
+| Navigation       | =OPEN "url"=                 | Page control                 |
+| Element Actions  | =CLICK "#btn"=               | UI interaction               |
+| Data Flow        | =SET var WITH value=         | State management             |
+| Control Logic    | =IF (cond) { ... }=          | Conditional execution        |
+| Error Handling   | =TRY { ... } CATCH { ... }=  | Resilient execution          |
+
+*  Syntax Specification
+** Command Structure
+- Space-separated tokens
+- Number of spaces between commands doesn't matter
+- No newlines required (but supported for readability)
+- Example: =OPEN "url"= =WAIT 3= =CLICK "#btn"=
+
+** Core Commands
+| Command               | Example                          | Description                     |
+|-----------------------+----------------------------------+---------------------------------|
+| =OPEN "url"=          | =OPEN "https://example.com"=     | Navigate to URL                 |
+| =CLICK "selector"=    | =CLICK "#submit-btn"=            | Click element                   |
+| =FILL sel WITH val=   | =FILL "#email" WITH "a@b.c"=     | Fill text field                 |
+| =READ "selector"=     | =SET text WITH READ ".header"=    | Extract text from element       |
+| =WAIT seconds=        | =WAIT 3=                         | Pause execution                 |
+| =LOG expression=      | =LOG "Done"= =LOG counter=       | Print output                    |
+
+** Variables
+*** Assignment
+- =SET variable WITH value=
+- Examples:
+  #+BEGIN_SRC plaintext
+  SET name WITH "Maaz"    # String assignment
+  SET count WITH 5        # Integer assignment
+  SET copy WITH original # Variable copying
+  #+END_SRC
+
+*** Usage
+- Referenced by name (lowercase)
+- Example: =LOG count= =FILL "#name" WITH username=
+
+** Conditionals
+*** Operators
+| Operator | Description          | Example                     |
+|----------+----------------------+-----------------------------|
+| IS       | Equality             | (var IS 5), (var IS "text") |
+| HAS      | String contains      | (var HAS "substr")          |
+| <        | Less than            | (var < 10)                  |
+| >        | Greater than         | (var > 10)                  |
+| <=       | Less than equals     | (var <= 10)                 |
+
+*** Syntax
+#+BEGIN_SRC plaintext
+IF (condition) {
+    # commands
+} ELSE {
+    # commands
+}
+#+END_SRC
+
+*** Example
+#+BEGIN_SRC plaintext
+SET status WITH READ "#status"
+IF (status HAS "success") {
+    CLICK "#next"
+} ELSE {
+    LOG "Operation failed"
+}
+#+END_SRC
+
+** Loops
+*** Syntax
+#+BEGIN_SRC plaintext
+WHILE condition {
+    # commands
+}
+#+END_SRC
+
+*** Example
+#+BEGIN_SRC plaintext
+SET counter WITH 0
+WHILE counter < 5 {
+    LOG counter
+    SET counter WITH counter + 1
+}
+#+END_SRC
+
+** Error Handling
+*** Syntax
+#+BEGIN_SRC plaintext
+TRY {
+    # commands
+} CATCH {
+    # error handling
+}
+#+END_SRC
+
+*** Example
+#+BEGIN_SRC plaintext
+TRY {
+    CLICK "#unstable-element"
+} CATCH {
+    LOG "Element not found"
+    CLICK "#fallback-btn"
+}
+#+END_SRC
+
+*** Sample Script
+#+BEGIN_SRC plaintext
+OPEN "https://example.com/login"
+SET username WITH READ "#username-label"
+
+IF (username HAS "Admin") {
+  FILL "#user" WITH "admin@test.com"
+} ELSE {
+  FILL "#user" WITH "guest@test.com"
+}
+
+TRY {
+  CLICK "#login-btn"
+} CATCH {
+  LOG "Login button missing!"
+}
+
+ON ".welcome"{
+
+        SET welcome_text WITH READ ".welcome"
+
+        IF (welcome_text HAS "Admin") {
+        FILL "#auth" WITH "admin-pass"
+        } ELSE {
+        FILL "#auth" WITH "default-pass"
+        }
+
+        TRY {
+        CLICK "#submit"
+        WAIT 2  # Wait for navigation
+        LOG "Login success!"
+        } CATCH {
+         LOG "Failed: element not found"
+        }
+}
+#+END_SRC
+
+*  Error Handling
+** Error Types
+*** Recoverable Errors
+- Playwright errors (timeouts, missing elements)
+- MyPL runtime errors (undefined variables)
+
+*** Fatal Errors
+- Syntax errors
+- Unsupported commands
+
+*  Architecture
+
+** Processing Pipeline
+1. *Lexer*: Tokenizes input (e.g., =OPEN= → =TokenType.NAVIGATE=)
+2. *Parser*: Builds Abstract Syntax Tree (AST) from tokens
+3. *Interpreter*: Executes AST using Playwright and Python
+
+** Key AST Nodes
+#+BEGIN_SRC typescript
+interface Program {
+  type: "Program";
+  body: Node[];
+}
+
+interface NavigateExpression {
+  type: "NavigateExpression";
+  url: Literal;
+}
+
+interface AssignmentExpression {
+  type: "AssignmentExpression";
+  target: Identifier;
+  value: Expression;
+}
+
+interface TryCatchExpression {
+  type: "TryCatchExpression";
+  try: Statement[];
+  catch: Statement[];
+}
+#+END_SRC
+
+*  Interpreter Architecture
+
+** Processing Pipeline
+1. *Lexical Analysis*: Tokenizes source code using regex patterns
+   - Example: ="CLICK"= → =(CLICK, "CLICK")=
+2. *Parsing*: Builds AST and validates syntax
+3. *Execution*: Walks AST and performs actions using Playwright
+
+** Key Components
+
+| Component          | Responsibility                                           |
+|--------------------|----------------------------------------------------------|
+| Lexer              | Transforms source code into token pairs                  |
+| Parser             | Constructs and validates the Abstract Syntax Tree (AST)  |
+| Runtime            | Manages state and executes the AST                       |
+| Playwright Adapter | Handles browser interactions using Playwright           |
+
+*  Lexical Analysis
+
+** Token Specification
+#+BEGIN_SRC python
+token_spec = [
+    ("FILL", r'\bFILL\b'),
+    ("TRY", r'\bTRY\b'),
+    ("CATCH", r'\bCATCH\b'),
+    ("ON", r'\bON\b'),
+    ("WAIT", r'\bWAIT\b'),
+    ("OPEN", r'\bOPEN\b'),
+    ("READ", r'\bREAD\b'),
+    ("WITH", r'\bWITH\b'),
+    ("SET", r'\bSET\b'),
+    ("LOG", r'\bLOG\b'),
+    ("CLICK", r'\bCLICK\b'),
+    ("WHILE", r'\bWHILE\b'),
+    ("IF", r'IF'),
+    ("ELSE", r'ELSE'),
+    ("INTEGER_LITERAL", r'\b\d+\b'),
+    ("STRING_LITERAL", r'"([^"]*)"'),
+    ("LOGICAL_OPERATOR", r'==|\bHAS\b|\bIS\b|[<>]=?'),
+    ("ARITHMETIC_OPERATOR", r'\+|\-|\*|\/'),
+    ("IDENTIFIER", r'\b[a-z][a-zA-Z0-9_]*\b'),
+    ("L_BRACE", r'\{'),
+    ("R_BRACE", r'\}'),
+    ("L_PAREN", r'\('),
+    ("R_PAREN", r'\)'),
+]
+#+END_SRC
+
+** Lexer Workflow
+1. *Input*: Source code file
+2. *Processing*:
+   - Scan stream using regex patterns
+   - Filter out whitespace/comments
+   - Generate token stream
+3. *Output*: Sequence of (token_type, value) pairs
+
+*  Syntax Parsing
+
+** Parser Architecture
+- *Recursive Descent*: Each grammar rule has a corresponding method
+- *Validation*: Strict token expectations
+- *AST Generation*: Structured program representation in JSON
+
+** Key Parsing Methods
+
+| Method                | Responsibility              |
+|-----------------------|-----------------------------|
+| =parse_statement()=    | Top-level dispatch          |
+| =parse_expression()=   | Handle values and operators |
+| =parse_block()=        | Process { ... } groups      |
+| =parse_conditional()=  | Handle IF/ELSE logic        |
+
+** Example AST Node
+#+BEGIN_SRC json
+{
+  "type": "ConditionalExpression",
+  "conditional": {
+    "type": "BinaryExpression",
+    "operator": "HAS",
+    "left": {"type": "Identifier", "name": "status"},
+    "right": {"type": "Literal", "value": "success"}
+  },
+  "then": [...],
+  "else": [...]
+}
+#+END_SRC
+
+*  Interpreter Design
+
+** Execution Pipeline
+1. Initialize Playwright browser
+2. Store variables in a dictionary
+3. Traverse AST:
+   - Resolve variables
+   - Execute Playwright commands
+   - Handle errors
+
+** Playwright Integration
+- Automatic waiting for elements
+- Direct mapping to browser actions:
+  - =CLICK= → =page.locator().click()=
+  - =FILL= → =page.locator().fill()=
+  - =READ= → =page.locator().text_content()=
+  - =ON= → =page.locator().wait_for(state ='visible')=

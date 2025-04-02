@@ -1,0 +1,8 @@
+SET x WITH 5
+LOG x
+
+WHILE 0 < x {
+LOG "here in while"
+LOG x
+SET x WITH x-1
+}
