@@ -1,8 +1,12 @@
-SET f WITH "sdsdsd"
 IF ("22" HAS "2"){
     LOG "TRUE"
-    LOG f
-# FILL "SD" WITH "sd"
+}ELSE{
+    LOG "FALSE"
+
+}
+
+IF (22 IS 20){
+    LOG "TRUE"
 }ELSE{
     LOG "FALSE"
 

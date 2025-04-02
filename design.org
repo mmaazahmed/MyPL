@@ -1,4 +1,11 @@
-Title# Waiting for element to load and perform prodecures
+Title# Design Document: MyPL (My Playwright Language)
+Key Features:
+ - syntax for clicks, navigation, forms, and assertions
+
+ - Built-in error handling (TRY/CATCH)
+ - Variables, conditionals (IF/ELSE), and loops (WHILE)
+ - Automatic waiting and retries
+Waiting for element to load and perform prodecures
 
 ON element FOR 20 {
 
