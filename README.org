@@ -1,5 +1,4 @@
-#TITLE: MyPL (My Playwright Language) Design Document
-#+AUTHOR: Muhammad Maaz Ahmed
+#+TITLE: MyPL (My Playwright Language) Design Document
 
 *  Language Overview
 ** Design Principles
