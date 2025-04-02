@@ -91,6 +91,8 @@ class Interpreter:
             result = right_value in left_value
         if operator =='<':
             return left_value < right_value
+        if operator =='>':
+            return left_value > right_value
         if operator =='<=':
             return left_value <= right_value
 
