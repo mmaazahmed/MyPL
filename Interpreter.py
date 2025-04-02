@@ -56,7 +56,7 @@ class Interpreter:
             await self.page.goto(url["value"])
 
     async def handle_read_expression(self,node):
-        locator = node["target"]["value"]
+        locator = await self.get_node_value(node["target"])
         return await self.page.locator(locator).first.text_content()
 
     async def handle_element_interaction(self,node):

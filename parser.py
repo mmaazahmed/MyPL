@@ -107,7 +107,7 @@ class Parser:
 
     def parse_read(self):
         self.expect('READ')
-        locator = self.parse_locator()
+        locator = self.parse_primary()
         return {
             "type": 'ReadExpression',
             "target": locator
