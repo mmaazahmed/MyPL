@@ -1,4 +1,6 @@
 #+TITLE: MyPL (My Playwright Language) Design Document
+*  How To run
+=python interpreter.py ./path/to/file=
 
 *  Language Overview
 ** Design Principles
