@@ -1,0 +1,6 @@
+OPEN "https://formsmarts.com/html-form-example"
+# LOG READ "text='First Name'"
+FILL "xpath=/html/body/div/form/input[6]" WITH "test"
+ON "xpath=/html/body/div/form"{
+
+}

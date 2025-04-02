@@ -1,0 +1,17 @@
+OPEN "https://facebook.com"
+SET heading WITH READ "#content > div > div > div > div._8esl > h2"
+LOG heading
+SET username WITH "mmaaz"
+FILL "#email" WITH username
+FILL "#pass" WITH "password123"
+CLICK "[name='login']"
+SET captcha_box WITH "#«r1»"
+
+TRY{
+
+    ON captcha_box {
+        FILL captcha_box WITH "i am not a robot :c"
+    }
+}CATCH{
+    LOG "captcha did not trigger" LOG "consider adding async or assigned timeout for ON"
+}

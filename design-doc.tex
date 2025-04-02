@@ -1,0 +1,442 @@
+% Created 2025-04-02 Wed 04:20
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Muhammad Maaz Ahmed}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={Muhammad Maaz Ahmed},
+ pdftitle={ MyPL (My Playwright Language) Design Document},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.4.50 (Org mode 9.7.22)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\#TITLE: MyPL (My Playwright Language) Design Document
+\section{Language Overview}
+\label{sec:org7ae3bed}
+\subsection{Design Principles}
+\label{sec:org3a83d57}
+\begin{itemize}
+\item English-like syntax for web automation
+\item Minimalist, space-separated commands
+\item Case-sensitive with specific conventions:
+\begin{itemize}
+\item Keywords: ALL CAPS (e.g., \texttt{OPEN}, \texttt{SET})
+\item Variables: lowercase (e.g., \texttt{counter}, \texttt{username})
+\item Comments: Start with \# (e.g., \texttt{\# This is a comment})
+\end{itemize}
+\end{itemize}
+\subsection{Supported Features}
+\label{sec:org9a42180}
+\subsubsection{Data Types}
+\label{sec:org16e6507}
+\begin{itemize}
+\item Integers (e.g., \texttt{3}, \texttt{42})
+\item Strings (double-quoted, e.g., \texttt{"hello"})
+\item Implicit Booleans (evaluated during runtime)
+\end{itemize}
+\subsubsection{Core Functionality}
+\label{sec:orgfb08050}
+\begin{itemize}
+\item Browser navigation
+\item Element interaction (clicks, fills)
+\item Text extraction
+\item Automatic waiting
+\item Manual waiting
+\item Variables and assignments
+\item Conditionals and loops
+\item Error handling
+\end{itemize}
+\subsection{Reserved Keywords}
+\label{sec:org0617d0f}
+\begin{center}
+\begin{tabular}{ll}
+Keyword & Purpose\\
+\hline
+OPEN & Navigate to URL\\
+WAIT & Pause execution\\
+CLICK & Click element\\
+FILL & Fill form field\\
+READ & Extract text from element\\
+LOG & Print output\\
+SET & Variable assignment\\
+IF & Conditional block\\
+ELSE & Alternative block\\
+WHILE & Loop construct\\
+TRY & Error handling block\\
+CATCH & Error recovery block\\
+HAS & String contains operator\\
+IS & Equality operator\\
+< & Less-than operator\\
+> & Greater-than operator\\
+<= & Less-than-equals operator\\
+\end{tabular}
+\end{center}
+\subsection{Language Components}
+\label{sec:org5a8b543}
+\begin{center}
+\begin{tabular}{lll}
+Component & Examples & Purpose\\
+\hline
+Navigation & \texttt{OPEN "url"} & Page control\\
+Element Actions & \texttt{CLICK "\#btn"} & UI interaction\\
+Data Flow & \texttt{SET var WITH value} & State management\\
+Control Logic & \texttt{IF (cond) \{ ... \}} & Conditional execution\\
+Error Handling & \texttt{TRY \{ ... \} CATCH \{ ... \}} & Resilient execution\\
+\end{tabular}
+\end{center}
+\section{Syntax Specification}
+\label{sec:org5118932}
+\subsection{Command Structure}
+\label{sec:orgcd94319}
+\begin{itemize}
+\item Space-separated tokens
+\item Number of spaces between commands doesn't matter
+\item No newlines required (but supported for readability)
+\item Example: \texttt{OPEN "url"} \texttt{WAIT 3} \texttt{CLICK "\#btn"}
+\end{itemize}
+\subsection{Core Commands}
+\label{sec:org00b54b9}
+\begin{center}
+\begin{tabular}{lll}
+Command & Example & Description\\
+\hline
+\texttt{OPEN "url"} & \texttt{OPEN "https://example.com"} & Navigate to URL\\
+\texttt{CLICK "selector"} & \texttt{CLICK "\#submit-btn"} & Click element\\
+\texttt{FILL sel WITH val} & \texttt{FILL "\#email" WITH "a@b.c"} & Fill text field\\
+\texttt{READ "selector"} & \texttt{SET text WITH READ ".header"} & Extract text from element\\
+\texttt{WAIT seconds} & \texttt{WAIT 3} & Pause execution\\
+\texttt{LOG expression} & \texttt{LOG "Done"} \texttt{LOG counter} & Print output\\
+\end{tabular}
+\end{center}
+\subsection{Variables}
+\label{sec:org3d1907c}
+\subsubsection{Assignment}
+\label{sec:org81fac20}
+\begin{itemize}
+\item \texttt{SET variable WITH value}
+\item Examples:
+\begin{verbatim}
+  SET name WITH "Maaz"    # String assignment
+  SET count WITH 5        # Integer assignment
+  SET copy WITH original # Variable copying
+\end{verbatim}
+\end{itemize}
+\subsubsection{Usage}
+\label{sec:org456738f}
+\begin{itemize}
+\item Referenced by name (lowercase)
+\item Example: \texttt{LOG count} \texttt{FILL "\#name" WITH username}
+\end{itemize}
+\subsection{Conditionals}
+\label{sec:org4717a7b}
+\subsubsection{Operators}
+\label{sec:org1e4b3ae}
+\begin{center}
+\begin{tabular}{lll}
+Operator & Description & Example\\
+\hline
+IS & Equality & (var IS 5), (var IS ``text'')\\
+HAS & String contains & (var HAS ``substr'')\\
+< & Less than & (var < 10)\\
+> & Greater than & (var > 10)\\
+<= & Less than equals & (var <= 10)\\
+\end{tabular}
+\end{center}
+\subsubsection{Syntax}
+\label{sec:org9d2b4f3}
+\begin{verbatim}
+IF (condition) {
+    # commands
+} ELSE {
+    # commands
+}
+\end{verbatim}
+\subsubsection{Example}
+\label{sec:orgcb13e04}
+\begin{verbatim}
+SET status WITH READ "#status"
+IF (status HAS "success") {
+    CLICK "#next"
+} ELSE {
+    LOG "Operation failed"
+}
+\end{verbatim}
+\subsection{Loops}
+\label{sec:org2e6134c}
+\subsubsection{Syntax}
+\label{sec:org174c0ca}
+\begin{verbatim}
+WHILE condition {
+    # commands
+}
+\end{verbatim}
+\subsubsection{Example}
+\label{sec:org89b4397}
+\begin{verbatim}
+SET counter WITH 0
+WHILE counter < 5 {
+    LOG counter
+    SET counter WITH counter + 1
+}
+\end{verbatim}
+\subsection{Error Handling}
+\label{sec:org7b07f29}
+\subsubsection{Syntax}
+\label{sec:orgfd0d7d6}
+\begin{verbatim}
+TRY {
+    # commands
+} CATCH {
+    # error handling
+}
+\end{verbatim}
+\subsubsection{Example}
+\label{sec:orgc7da632}
+\begin{verbatim}
+TRY {
+    CLICK "#unstable-element"
+} CATCH {
+    LOG "Element not found"
+    CLICK "#fallback-btn"
+}
+\end{verbatim}
+\subsubsection{Sample Script}
+\label{sec:org354660a}
+\begin{verbatim}
+OPEN "https://example.com/login"
+SET username WITH READ "#username-label"
+
+IF (username HAS "Admin") {
+  FILL "#user" WITH "admin@test.com"
+} ELSE {
+  FILL "#user" WITH "guest@test.com"
+}
+
+TRY {
+  CLICK "#login-btn"
+} CATCH {
+  LOG "Login button missing!"
+}
+
+ON ".welcome"{
+
+        SET welcome_text WITH READ ".welcome"
+
+        IF (welcome_text HAS "Admin") {
+        FILL "#auth" WITH "admin-pass"
+        } ELSE {
+        FILL "#auth" WITH "default-pass"
+        }
+
+        TRY {
+        CLICK "#submit"
+        WAIT 2  # Wait for navigation
+        LOG "Login success!"
+        } CATCH {
+         LOG "Failed: element not found"
+        }
+}
+\end{verbatim}
+\section{Error Handling}
+\label{sec:orgde90bbc}
+\subsection{Error Types}
+\label{sec:org6c4d84f}
+\subsubsection{Recoverable Errors}
+\label{sec:orgdf62134}
+\begin{itemize}
+\item Playwright errors (timeouts, missing elements)
+\item MyPL runtime errors (undefined variables)
+\end{itemize}
+\subsubsection{Fatal Errors}
+\label{sec:org443d843}
+\begin{itemize}
+\item Syntax errors
+\item Unsupported commands
+\end{itemize}
+\section{Architecture}
+\label{sec:org6afe8d5}
+
+\subsection{Processing Pipeline}
+\label{sec:org8f9425c}
+\begin{enumerate}
+\item \textbf{Lexer}: Tokenizes input (e.g., \texttt{OPEN} → \texttt{TokenType.NAVIGATE})
+\item \textbf{Parser}: Builds Abstract Syntax Tree (AST) from tokens
+\item \textbf{Interpreter}: Executes AST using Playwright and Python
+\end{enumerate}
+\subsection{Key AST Nodes}
+\label{sec:org2dc8b85}
+\begin{verbatim}
+interface Program {
+  type: "Program";
+  body: Node[];
+}
+
+interface NavigateExpression {
+  type: "NavigateExpression";
+  url: Literal;
+}
+
+interface AssignmentExpression {
+  type: "AssignmentExpression";
+  target: Identifier;
+  value: Expression;
+}
+
+interface TryCatchExpression {
+  type: "TryCatchExpression";
+  try: Statement[];
+  catch: Statement[];
+}
+\end{verbatim}
+\section{Interpreter Architecture}
+\label{sec:orgc2ee916}
+
+\subsection{Processing Pipeline}
+\label{sec:org08efd3c}
+\begin{enumerate}
+\item \textbf{Lexical Analysis}: Tokenizes source code using regex patterns
+\begin{itemize}
+\item Example: \texttt{"CLICK"} → \texttt{(CLICK, "CLICK")}
+\end{itemize}
+\item \textbf{Parsing}: Builds AST and validates syntax
+\item \textbf{Execution}: Walks AST and performs actions using Playwright
+\end{enumerate}
+\subsection{Key Components}
+\label{sec:orge4404d5}
+
+\begin{center}
+\begin{tabular}{ll}
+Component & Responsibility\\
+\hline
+Lexer & Transforms source code into token pairs\\
+Parser & Constructs and validates the Abstract Syntax Tree (AST)\\
+Runtime & Manages state and executes the AST\\
+Playwright Adapter & Handles browser interactions using Playwright\\
+\end{tabular}
+\end{center}
+\section{Lexical Analysis}
+\label{sec:org56fecd5}
+
+\subsection{Token Specification}
+\label{sec:orga1346f2}
+\begin{verbatim}
+token_spec = [
+    ("FILL", r'\bFILL\b'),
+    ("TRY", r'\bTRY\b'),
+    ("CATCH", r'\bCATCH\b'),
+    ("ON", r'\bON\b'),
+    ("WAIT", r'\bWAIT\b'),
+    ("OPEN", r'\bOPEN\b'),
+    ("READ", r'\bREAD\b'),
+    ("WITH", r'\bWITH\b'),
+    ("SET", r'\bSET\b'),
+    ("LOG", r'\bLOG\b'),
+    ("CLICK", r'\bCLICK\b'),
+    ("WHILE", r'\bWHILE\b'),
+    ("IF", r'IF'),
+    ("ELSE", r'ELSE'),
+    ("INTEGER_LITERAL", r'\b\d+\b'),
+    ("STRING_LITERAL", r'"([^"]*)"'),
+    ("LOGICAL_OPERATOR", r'==|\bHAS\b|\bIS\b|[<>]=?'),
+    ("ARITHMETIC_OPERATOR", r'\+|\-|\*|\/'),
+    ("IDENTIFIER", r'\b[a-z][a-zA-Z0-9_]*\b'),
+    ("L_BRACE", r'\{'),
+    ("R_BRACE", r'\}'),
+    ("L_PAREN", r'\('),
+    ("R_PAREN", r'\)'),
+]
+\end{verbatim}
+\subsection{Lexer Workflow}
+\label{sec:orgb20e6dc}
+\begin{enumerate}
+\item \textbf{Input}: Source code file
+\item \textbf{Processing}:
+\begin{itemize}
+\item Scan stream using regex patterns
+\item Filter out whitespace/comments
+\item Generate token stream
+\end{itemize}
+\item \textbf{Output}: Sequence of (token\textsubscript{type}, value) pairs
+\end{enumerate}
+\section{Syntax Parsing}
+\label{sec:org0dce5e1}
+
+\subsection{Parser Architecture}
+\label{sec:orge8afe61}
+\begin{itemize}
+\item \textbf{Recursive Descent}: Each grammar rule has a corresponding method
+\item \textbf{Validation}: Strict token expectations
+\item \textbf{AST Generation}: Structured program representation in JSON
+\end{itemize}
+\subsection{Key Parsing Methods}
+\label{sec:org8173cd0}
+
+\begin{center}
+\begin{tabular}{ll}
+Method & Responsibility\\
+\hline
+\texttt{parse\_statement()} & Top-level dispatch\\
+\texttt{parse\_expression()} & Handle values and operators\\
+\texttt{parse\_block()} & Process \{ \ldots{} \} groups\\
+\texttt{parse\_conditional()} & Handle IF/ELSE logic\\
+\end{tabular}
+\end{center}
+\subsection{Example AST Node}
+\label{sec:orga511641}
+\begin{verbatim}
+{
+  "type": "ConditionalExpression",
+  "conditional": {
+    "type": "BinaryExpression",
+    "operator": "HAS",
+    "left": {"type": "Identifier", "name": "status"},
+    "right": {"type": "Literal", "value": "success"}
+  },
+  "then": [...],
+  "else": [...]
+}
+\end{verbatim}
+\section{Interpreter Design}
+\label{sec:orgece4ac4}
+
+\subsection{Execution Pipeline}
+\label{sec:orgf0d1920}
+\begin{enumerate}
+\item Initialize Playwright browser
+\item Store variables in a dictionary
+\item Traverse AST:
+\begin{itemize}
+\item Resolve variables
+\item Execute Playwright commands
+\item Handle errors
+\end{itemize}
+\end{enumerate}
+\subsection{Playwright Integration}
+\label{sec:org00b573e}
+\begin{itemize}
+\item Automatic waiting for elements
+\item Direct mapping to browser actions:
+\begin{itemize}
+\item \texttt{CLICK} → \texttt{page.locator().click()}
+\item \texttt{FILL} → \texttt{page.locator().fill()}
+\item \texttt{READ} → \texttt{page.locator().text\_content()}
+\item \texttt{ON} → \texttt{page.locator().wait\_for(state ='visible')}
+\end{itemize}
+\end{itemize}
+\end{document}

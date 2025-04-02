@@ -1,0 +1,9 @@
+LOG "HERE"
+TRY{
+ LOG "in try"
+ LOG as
+}CATCH{
+
+ LOG "in catch"
+
+}

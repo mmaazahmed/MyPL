@@ -1,0 +1,11 @@
+SET count WITH 0
+SET a WITH "c"
+WHILE a HAS "c" {
+LOG "12"
+SET count WITH count+1
+    IF (count>5){
+        SET a WITH "u"
+    }ELSE{
+        LOG "todo:make else optional"
+    }
+}

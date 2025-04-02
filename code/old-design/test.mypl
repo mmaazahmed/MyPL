@@ -1,0 +1,45 @@
+# TRY{
+#     Open "https://example.com" # add promise to stack
+#     Wait # wait for promise to fulfil
+#     IF "#pageLoaded" EXISTS{
+#         Read "#price" ## Push to stack
+#         Store price ## Pop stack and store value in price
+#         IF price > 50:{
+#             Click "#buyNow"
+#         }ELSE{
+#             Click "#continueBrowsing"
+#         }
+# }CATCH{
+#     Log "Error: Could not read price or click button"
+# }
+Store a bkk
+
+OPEN "https://example.com"
+
+ON "#username" As username {
+    FILL username With "test_user"
+}
+
+ON "#password" As password { //wait for password key and store result in password
+    FILL password With "secure123"
+}
+
+ON "#loginButton" {
+    CLICK
+}
+
+ON "#price" As price {
+    WHEN price > 50 {
+        CLICK "#buyNow"
+    }
+}
+
+Loop a..b step 1 {
+}
+READ "#confirmationMessage" As message
+
+IF READ "#welcome_text" CONTAINS "Hello, test_user" {
+    CLICK "#continue"
+} ELSE {
+    CLICK "#retry"
+}

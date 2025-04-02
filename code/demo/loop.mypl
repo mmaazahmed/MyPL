@@ -1,0 +1,12 @@
+
+SET attempts WITH 0
+WHILE attempts < 5 {
+    TRY {
+        LOG "here"
+        # CLICK "#submit-btn"
+        SET attempts WITH attempts + 1
+    } CATCH {
+        WAIT 1
+        SET attempts WITH attempts + 1
+    }
+}

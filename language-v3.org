@@ -1,0 +1,41 @@
+# Open a ebpage
+OPEN "https://example.com"
+
+# wait for element to load
+ON "#login-form" {
+    FILL "#username" WITH "test_user" # directly fill '#username' with "test_user"
+    FILL "#password" WITH password_variable # fill "#password" with value in password_variable
+    CLICK "#submit"
+}
+
+# Read value in '#welcome-message' and store in variable
+SET variable1 WITH READ "#element"
+SET variable2 WITH "text" # set variable with text
+SET variable3 WITH variable2 # set variable3 with value in variable 2
+
+IF welcome_text CONTAINS "Hello, test_user" {
+    CLICK "#continue"
+} ELSE {
+    CLICK "#retry"
+}
+
+# syntax not yet supported
+IF READ "#welcome_text" CONTAINS "Hello, test_user" {
+    CLICK "#continue"
+} ELSE {
+    CLICK "#retry"
+}
+
+
+
+TRY {
+    CLICK "#confirm"
+} CATCH {
+    LOG "Failed to click confirm button."
+}
+
+#not yet implemented
+# Looping Keep checking if element exists
+WHILE "#loading" EXISTS {
+    WAIT 1s
+}

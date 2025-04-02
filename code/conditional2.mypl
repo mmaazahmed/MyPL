@@ -1,0 +1,17 @@
+SET x WITH "SF"
+SET hi WITH 5
+SET hi WITH 5+1
+IF (x HAS "F"){
+        LOG "waiting"
+        LOG "done waiting"
+        SET b WITH "c"
+        IF (b HAS "c"){
+            LOG "b has c"
+        }ELSE{
+            LOG "do "
+        }
+    }ELSE{
+    LOG "do nothing"
+}
+
+LOG "outside condition"

@@ -1,0 +1,1 @@
+SET a WITH "c" WHILE a HAS "c" LOG "12"  # Missing braces

@@ -1,0 +1,13 @@
+IF ("22" HAS "2"){
+    LOG "TRUE"
+}ELSE{
+    LOG "FALSE"
+
+}
+
+IF (22 IS 20){
+    LOG "TRUE"
+}ELSE{
+    LOG "FALSE"
+
+}

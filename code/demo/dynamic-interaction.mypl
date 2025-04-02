@@ -1,0 +1,18 @@
+TRY{
+
+
+
+ON ".dynamic-content" {
+    SET content WITH READ ".dynamic-content"
+    LOG content
+
+    IF (content HAS "Loading") {
+        WAIT 2
+        SET content WITH READ ".dynamic-content"
+        LOG content
+    }
+}
+
+}CATCH{
+LOG "caught error"
+}
