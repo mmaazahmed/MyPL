@@ -1,0 +1,7 @@
+SET count WITH 0
+SET end WITH 5
+LOOP count..end STEP 3{
+    SET count WITH count+1
+    SET end WITH 100
+    LOG count
+}

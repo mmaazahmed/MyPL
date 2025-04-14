@@ -9,6 +9,7 @@ class Parser:
         self.tokens = None
         self.index = 0
         self.ast = None
+        self.block_index=0
 
     def peek(self, offset=0):
         return self.tokens[self.index+offset] if self.index+offset < len(self.tokens) else None
@@ -48,7 +49,12 @@ class Parser:
         while not self.match('R_BRACE') and self.peek() is not None:
             actions.append(self.parse_statement())
         self.expect('R_BRACE')
-        return actions
+        self.block_index+=1
+        return {
+            "type":'Block',
+            "scope":self.block_index,
+            "actions":actions,
+        }
 
     def parse_assignment(self):
         self.expect('SET')
@@ -215,11 +221,30 @@ class Parser:
             return left
         operator = self.consume()[1]
         right = self.parse_expression()
+
         return {
             "type": "BinaryExpression",
             "operator": operator,
             "left": left,
             "right": right,
+            "step":None
+        }
+    def parse_range_loop(self):
+        self.expect('LOOP')
+        start = self.parse_primary()
+        self.expect('RANGE_OP')
+        end = self.parse_primary()
+        step = None
+        if self.match('STEP'):
+            self.consume()
+            step = self.parse_primary()
+        block = self.parse_block()
+        return {
+            "type":"RangeLoopExpression",
+            "start":start,
+            "end":end,
+            "step":step,
+            "block":block
         }
 
     def parse_statement(self):
@@ -244,6 +269,8 @@ class Parser:
             return self.parse_try_catch()
         elif token[0] == 'WHILE':
             return self.parse_while_loop()
+        elif token[0] == 'LOOP':
+            return self.parse_range_loop()
         elif token[0] == 'WAIT':
             return self.parse_wait()
         elif token[0] in ["INTEGER_LITERAL", "STRING_LITERAL", "IDENTIFIER"]:

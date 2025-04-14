@@ -6,7 +6,8 @@ from playwright.async_api import async_playwright, Error,TimeoutError
 class Interpreter:
     def __init__(self):
         self.parser = Parser()
-        self.variables = {}
+        # self.variables = [{} for _ in range(self.parser.block_index)] # index 0 stores global scope
+        self.variables =  {}
         self.playwright = None
         self.browser = None
         self.page = None
@@ -137,6 +138,18 @@ class Interpreter:
             return left - right
         raise RuntimeError(f"unsupported operator {operator}")
 
+    async def handle_range_loop_expression(self, node):
+        print("here in handle_Range")
+        start = await self.get_node_value(node["start"])
+        end = await self.get_node_value(node["end"])
+        step_value =node["step"]
+        step = await self.get_node_value(step_value) if step_value is not None else 1
+        block = node["block"]
+        for _ in range(int(start), int(end),int(step)):
+            for statement in block["actions"]:
+                await self.execute(statement)
+
+
     async def execute(self, node):
         type = node["type"]
         if type == 'ElementInteraction':
@@ -159,6 +172,8 @@ class Interpreter:
             return await self.handle_try_catch_expression(node)
         elif type == "WhileLoopExpression":
             return await self.handle_while_expression(node)
+        elif type == "RangeLoopExpression":
+            return await self.handle_range_loop_expression(node)
         elif type == "WaitExpression":
             return await self.handle_wait_expression(node)
         elif type == "BinaryExpression":
@@ -176,7 +191,7 @@ class Interpreter:
             self.ast = self.parser.parse(file_path)
             for node in self.ast["body"]:
                 await self.execute(node)
-            print(f"Done executing script {file_path}")
+                print(f"Done executing script {file_path}")
         except Exception as e:
             print(type(e))
             print(f"Error during execution: file:{file_path} {e}")
@@ -190,7 +205,7 @@ class Interpreter:
 
 async def main(file_path:str,flag):
     i = Interpreter()
-    await i.initialize(False)
+    await i.initialize(True)
     await i.run(file_path)
     if (flag in ["--debug","-d"]):
         print("------------------------------------")
